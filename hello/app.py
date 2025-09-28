@@ -50,8 +50,11 @@ def create_app(settings_override=None):
     app.register_blueprint(up)
     app.register_blueprint(page)
 
-    extensions(app)
+    # NEW: mount the API
+    from hello.api import api_bp
+    app.register_blueprint(api_bp, url_prefix="/api/v1")
 
+    extensions(app)
     return app
 
 
