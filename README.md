@@ -1,23 +1,18 @@
-# 🐳 An example Flask + Docker app
+# 🐳 Flask + Kafka Sensor Pipeline (Dockerized)
 
-You could use this example app as a base for your new project or as a guide to
-Dockerize your existing Flask app.
+A production-friendly **Flask** starter (based on Nick Janetakis' Docker example) **extended with a Smart Device Sensor pipeline** using **Kafka**. Use this repo as a base for your next project or as a guide to Dockerize an existing Flask app and add streaming.
 
-The example app is minimal but it wires up a number of things you might use in
-a real world Flask app, but at the same time it's not loaded up with a million
-personal opinions.
+The example app is minimal but it wires up a number of things you might use in a real world Flask app, but at the same time it's not loaded up with a million personal opinions.
 
-For the Docker bits, everything included is an accumulation of [Docker best
-practices](https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose)
-based on building and deploying dozens of assorted Dockerized web apps since
-late 2014.
+For the Docker bits, everything included is an accumulation of [Docker best practices](https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose) based on building and deploying dozens of assorted Dockerized web apps since late 2014.
 
-**This app is using Flask 3.1.2 and Python 3.13.7**. The screenshot shows
-`X.X.X` since they get updated regularly:
+**This app is using Flask 3.1.2 and Python 3.13.7**. The screenshot shows `X.X.X` since they get updated regularly:
 
 [![Screenshot](.github/docs/screenshot.jpg)](https://github.com/nickjj/docker-flask-example/blob/main/.github/docs/screenshot.jpg?raw=true)
 
-## 🧾 Table of contents
+---
+
+## 🧾 Table of Contents
 
 - [Tech stack](#tech-stack)
 - [Notable opinions and extensions](#notable-opinions-and-extensions)
@@ -111,6 +106,56 @@ Besides the Flask app itself:
 - Docker support has been added which would be any files having `*docker*` in
   its name
 - GitHub Actions have been set up
+
+
+
+## 🛠 Bootstrapping / Starting the Project
+
+Since this project uses Docker Compose with multiple services (Flask, Kafka, Airflow, Postgres, Redis, etc.), 
+you need to initialize the environment the first time you run it (or after deleting images/volumes).
+
+### 1. Prepare Airflow directories
+
+```sh
+mkdir -p ./airflow/dags ./airflow/logs ./airflow/plugins ./airflow/config
+```
+
+### 2. Initialize Airflow (one-time)
+
+```sh
+docker compose up airflow-init
+```
+Wait until you see `Airflow init done.` and the container exits with code 0.
+
+### 3. Start the whole stack
+
+```sh
+docker compose up -d
+```
+
+This will build fresh images, pull base images, and launch all services.
+
+### 4. Verify everything is running
+
+```sh
+docker ps
+```
+
+Check that containers show `Up (healthy)`:
+
+- **Flask** → http://localhost:8000  
+- **Airflow** → http://localhost:8080 (user: `airflow`, pass: `airflow`)  
+- **Kafka** → inside network: `kafka:9092`, from host: `localhost:9093`  
+
+### 5. (Optional) Run producer
+
+If you didn’t add a `producer` service to `docker-compose.yml`, run it manually:
+
+```sh
+docker compose run --rm web python producer.py
+```
+
+---
 
 ## 🚀 Running this app
 
